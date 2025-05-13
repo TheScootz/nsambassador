@@ -1,0 +1,2 @@
+# NSDA
+NationStates Discord bot
