@@ -20,9 +20,10 @@ class NSAmbassador(commands.Bot):
     def __init__(self, *, intents: discord.Intents):
         super().__init__(command_prefix=[], intents=intents)
         dotenv.load_dotenv()
+        self.logger = logging.getLogger(__name__)
+        self.logger.info(f"NSAmbassador running discord.py {discord.__version__}")
 
     async def setup_hook(self):
-        self.logger = logging.getLogger(__name__)
         self.client = pymongo.MongoClient(config.MONGODB_URI)
         await self.add_cog(guildconfig.GuildConfig(self))
         await self.add_cog(verification.Verification(self))
@@ -36,5 +37,4 @@ if __name__ == "__main__":
     intents: discord.Intents = discord.Intents.default()
     bot: discord.Client = NSAmbassador(intents=intents)
 
-    print(f"Running discord.py {discord.__version__}")
     bot.run(config.BOT_TOKEN, log_level=config.LOG_LEVEL, root_logger=True)
