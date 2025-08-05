@@ -14,7 +14,7 @@ from cogs import guildconfig
 
 class NSAmbassador(commands.Bot):
     logger: logging.Logger
-    client: pymongo.MongoClient
+    dbclient: pymongo.AsyncMongoClient
 
     def __init__(self, *, intents: discord.Intents):
         super().__init__(command_prefix=[], intents=intents)
@@ -22,7 +22,7 @@ class NSAmbassador(commands.Bot):
         self.logger.info(f"NSAmbassador running discord.py {discord.__version__}")
 
     async def setup_hook(self):
-        self.client = pymongo.MongoClient(config.MONGODB_URI)
+        self.dbclient = await pymongo.AsyncMongoClient(config.MONGODB_URI)
         await self.add_cog(guildconfig.GuildConfig(self))
         await self.add_cog(verification.Verification(self))
     
