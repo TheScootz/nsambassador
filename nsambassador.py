@@ -3,7 +3,6 @@ import logging
 import os
 
 import discord
-import dotenv
 import nationstates
 import pymongo
 from discord.ext import commands
@@ -19,7 +18,6 @@ class NSAmbassador(commands.Bot):
 
     def __init__(self, *, intents: discord.Intents):
         super().__init__(command_prefix=[], intents=intents)
-        dotenv.load_dotenv()
         self.logger = logging.getLogger(__name__)
         self.logger.info(f"NSAmbassador running discord.py {discord.__version__}")
 
