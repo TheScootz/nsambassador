@@ -2,9 +2,9 @@ import asyncio
 import logging
 import os
 
+import asyncpg
 import discord
 import nationstates
-import pymongo
 from discord.ext import commands
 
 import config
@@ -14,7 +14,7 @@ from cogs import guildconfig
 
 class NSAmbassador(commands.Bot):
     logger: logging.Logger
-    dbclient: pymongo.AsyncMongoClient
+    database: asyncpg.Connection
 
     def __init__(self, *, intents: discord.Intents):
         super().__init__(command_prefix=[], intents=intents)
@@ -22,7 +22,7 @@ class NSAmbassador(commands.Bot):
         self.logger.info(f"NSAmbassador running discord.py {discord.__version__}")
 
     async def setup_hook(self):
-        self.dbclient = await pymongo.AsyncMongoClient(config.MONGODB_URI)
+        self.database = await asyncpg.connect(config.POSTGRES_URI)
         await self.add_cog(guildconfig.GuildConfig(self))
         await self.add_cog(verification.Verification(self))
     
