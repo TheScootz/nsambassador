@@ -1,15 +1,12 @@
 import asyncio
 import logging
-import os
 
 import asyncpg
 import discord
 import nationstates
 from discord.ext import commands
 
-import config
-from cogs import verification
-from cogs import guildconfig
+from . import config
 
 
 class NSAmbassador(commands.Bot):
@@ -23,8 +20,8 @@ class NSAmbassador(commands.Bot):
 
     async def setup_hook(self):
         self.database = await asyncpg.connect(config.POSTGRES_URI)
-        await self.add_cog(guildconfig.GuildConfig(self))
-        await self.add_cog(verification.Verification(self))
+        await self.load_extension('cogs.guildconfig')
+        await self.load_extension('cogs.verification')
     
     async def on_ready(self):
         assert self.user is not None
