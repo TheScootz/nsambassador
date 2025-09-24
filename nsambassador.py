@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 
 import asyncpg
@@ -6,7 +7,7 @@ import discord
 import nationstates
 from discord.ext import commands
 
-from . import config
+import nsaconfig
 
 
 class NSAmbassador(commands.Bot):
@@ -19,9 +20,11 @@ class NSAmbassador(commands.Bot):
         self.logger.info(f"NSAmbassador running discord.py {discord.__version__}")
 
     async def setup_hook(self):
-        self.database = await asyncpg.connect(config.POSTGRES_URI)
-        await self.load_extension('cogs.guildconfig')
-        await self.load_extension('cogs.verification')
+        self.database = await asyncpg.connect(nsaconfig.POSTGRES_URI)
+        await self.database.set_type_codec("jsonb", encoder=json.dumps, decoder=json.loads, schema="pg_catalog")
+
+        await self.load_extension("cogs.guildconfig")
+        await self.load_extension("cogs.verification")
     
     async def on_ready(self):
         assert self.user is not None
@@ -32,4 +35,4 @@ if __name__ == "__main__":
     intents: discord.Intents = discord.Intents.default()
     bot: discord.Client = NSAmbassador(intents=intents)
 
-    bot.run(config.BOT_TOKEN, log_level=config.LOG_LEVEL, root_logger=True)
+    bot.run(nsaconfig.BOT_TOKEN, log_level=nsaconfig.LOG_LEVEL, root_logger=True)
