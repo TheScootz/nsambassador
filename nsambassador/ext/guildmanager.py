@@ -17,8 +17,9 @@ class GuildManager(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_available(self, guild: discord.Guild):
         # Synchronize commands with servers
+        self.bot.tree.copy_global_to(guild=guild)
         await self.bot.tree.sync(guild=guild)
-        self.logger.info(f"Synched commands to guild {guild.name} (ID: {guild.id})")
+        self.logger.debug(f"Synched commands to guild {guild.name} (ID: {guild.id})")
     
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
