@@ -6,7 +6,7 @@ from discord.ext import commands
 from nsambassador.nsambassador import NSAmbassador
 
 
-class GuildConfig(commands.Cog):
+class GuildManager(commands.Cog):
     bot: NSAmbassador
     logger: logging.Logger
     
@@ -37,4 +37,4 @@ class GuildConfig(commands.Cog):
 
 
 async def setup(bot: NSAmbassador):
-    await bot.add_cog(GuildConfig(bot=bot))
+    await bot.add_cog(GuildManager(bot=bot))
