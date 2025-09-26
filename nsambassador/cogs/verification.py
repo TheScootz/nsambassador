@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from nsambassador import NSAmbassador
+from nsambassador.nsambassador import NSAmbassador
 
 class Verification(commands.Cog):
     bot: NSAmbassador

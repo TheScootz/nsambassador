@@ -3,7 +3,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from nsambassador import NSAmbassador
+from nsambassador.nsambassador import NSAmbassador
 
 
 class GuildConfig(commands.Cog):
