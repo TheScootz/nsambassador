@@ -4,9 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-"discord.py" = {extras = ["voice"], version = "*"}
 asyncpg = "*"
 nationstates = "*"
+"discord.py" = {extras = ["voice"], version = ">=2.6.0"}
 
 [dev-packages]
 
