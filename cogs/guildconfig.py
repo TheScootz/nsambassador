@@ -24,7 +24,7 @@ class GuildConfig(commands.Cog):
     async def on_guild_join(self, guild: discord.Guild):
         self.logger.info("Joined guild {} (ID: {})".format(guild.name, guild.id))
         # Add guild to DB if it's not already there
-        if len(await self.bot.database.fetch("SELECT * FROM guild WHERE snowflake = $1", guild.id)) == 0:
+        if (await self.bot.database.fetchrow("SELECT * FROM guild WHERE snowflake = $1", guild.id)) is None:
             try:
                 await self.bot.database.execute("INSERT INTO guild (snowflake) VALUES ($1)", guild.id)
             except Exception as e:
