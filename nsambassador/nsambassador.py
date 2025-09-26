@@ -23,7 +23,7 @@ class NSAmbassador(commands.Bot):
         self.database = await asyncpg.connect(config.POSTGRES_URI)
         await self.database.set_type_codec("jsonb", encoder=json.dumps, decoder=json.loads, schema="pg_catalog")
 
-        await self.load_extension(".ext.guildconfig", package="nsambassador")
+        await self.load_extension(".ext.guildmanager", package="nsambassador")
         await self.load_extension(".ext.verification", package="nsambassador")
     
     async def on_ready(self):
