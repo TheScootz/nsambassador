@@ -22,7 +22,7 @@ class GuildManager(commands.Cog):
     
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
-        self.logger.info("Joined guild {} (ID: {})".format(guild.name, guild.id))
+        self.logger.info(f"Joined guild {guild.name} (ID: {guild.id})")
         # Add guild to DB if it's not already there
         if (await self.bot.database.fetchrow("SELECT * FROM guild WHERE snowflake = $1", guild.id)) is None:
             try:
