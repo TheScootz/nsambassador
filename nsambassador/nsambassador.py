@@ -29,3 +29,15 @@ class NSAmbassador(commands.Bot):
     async def on_ready(self):
         assert self.user is not None
         self.logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
+
+def main():
+    intents = discord.Intents.default()
+    bot = NSAmbassador(intents=intents)
+
+    @bot.tree.command()
+    async def reload_extensions(interaction: discord.Interaction):
+        await bot.reload_extension(".ext.guildmanager", package="nsambassador")
+        await bot.reload_extension(".ext.verification", package="nsambassador")
+        await interaction.response.send_message("All extensions reloaded", ephemeral=True)
+
+    bot.run(config.BOT_TOKEN, log_level=config.LOG_LEVEL, root_logger=True)
