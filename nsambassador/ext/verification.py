@@ -66,13 +66,13 @@ class VericodeLinkView(discord.ui.LayoutView):
         self.nation = nation
 
         text = discord.ui.TextDisplay(
-            f'To verify your NationStates nation, you need your Login Verification Code. You can find it by clicking the button below. Once you have it, press "Verify" to finish verifying.'
+            f'To verify your NationStates nation, you need your Verification Code. You can find it by clicking the button below. Once you have it, press "Verify" to finish verifying.'
         )
         self.action_row = discord.ui.ActionRow()
 
         self.action_row.add_item(
             discord.ui.Button(
-                label="Get Login Verification Code",
+                label="Get Verification Code",
                 style=discord.ButtonStyle.primary,
                 url=f"https://www.nationstates.net/page=verify_login?token={hash(nation + TOKEN_SALT)}",
             )
@@ -103,9 +103,9 @@ class GetVericodeModal(discord.ui.Modal, title="Finish Verifying"):
         super().__init__()
         self.nation = nation
         self.vericode = discord.ui.Label(
-            text="Login Verification Code",
-            description="Your Login Verification Code from NationStates",
-            component=discord.ui.TextInput(placeholder="Enter Login Verification Code"),
+            text="Verification Code",
+            description="Your Verification Code from NationStates",
+            component=discord.ui.TextInput(placeholder="Enter Verification Code"),
         )
 
         self.add_item(self.vericode)
