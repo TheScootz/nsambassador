@@ -38,6 +38,7 @@ def main():
     async def reload_extensions(interaction: discord.Interaction):
         await bot.reload_extension(".ext.guildmanager", package="nsambassador")
         await bot.reload_extension(".ext.verification", package="nsambassador")
+        bot.logger.info("All extensions reloaded")
         await interaction.response.send_message("All extensions reloaded", ephemeral=True)
 
     bot.run(config.BOT_TOKEN, log_level=config.LOG_LEVEL, root_logger=True)
