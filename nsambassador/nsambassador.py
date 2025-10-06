@@ -13,6 +13,7 @@ import nsambassador.config as config
 class NSAmbassador(commands.Bot):
     logger: logging.Logger
     database: asyncpg.Connection
+    nsapi: nationstates.Nationstates
 
     def __init__(self, *, intents: discord.Intents):
         super().__init__(command_prefix=[], intents=intents)
@@ -22,6 +23,8 @@ class NSAmbassador(commands.Bot):
     async def setup_hook(self):
         self.database = await asyncpg.connect(config.POSTGRES_URI)
         await self.database.set_type_codec("jsonb", encoder=json.dumps, decoder=json.loads, schema="pg_catalog")
+
+        self.nsapi = nationstates.Nationstates(config.USER_AGENT)
 
         await self.load_extension(".ext.guildmanager", package="nsambassador")
         await self.load_extension(".ext.verification", package="nsambassador")
