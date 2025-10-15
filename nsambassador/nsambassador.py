@@ -14,6 +14,7 @@ class NSAmbassador(commands.Bot):
     logger: logging.Logger
     database: asyncpg.Connection
     nsapi: nationstates.Nationstates
+    settings: dict[int, dict] = {}  # TODO replace with proper dataclass
 
     def __init__(self, *, intents: discord.Intents):
         super().__init__(command_prefix="!", intents=intents)
