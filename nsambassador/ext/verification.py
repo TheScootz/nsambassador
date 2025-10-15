@@ -27,8 +27,8 @@ class Verification(commands.Cog):
     @app_commands.command()
     async def verify(self, interaction: discord.Interaction):
         if (await self.fetch_usernation(interaction.user.id)) is None:
-            await interaction.response.send_modal(
-                GetNationModal(VerificationAttempt(self))
+            await interaction.response.send_message(
+                view=VericodeLinkView(VerificationAttempt(self, interaction.user)), ephemeral=True
             )
 
     async def fetch_usernation(self, userid: int) -> Optional[dict]:
@@ -37,20 +37,29 @@ class Verification(commands.Cog):
         )
         return None if record is None else dict(record)
 
-    async def _verify(self, data: "VerificationAttempt") -> bool:
+    async def _verify(self, data: "VerificationAttempt") -> str:
         nation = self.bot.nsapi.nation(data.nation_name)
-        print(data.token)
         resp = nation.verify(checksum=data.checksum, token=data.token)
         assert isinstance(resp, dict)
-        if (resp["data"][0] == "1"):
-            return True
+        if resp["data"][0] == "1":
+            try:
+                await self.bot.database.execute(
+                    "INSERT INTO usernation (snowflake, nation) VALUES ($1, $2)", data.user.id, nation.nation_name
+                )
+            except Exception as e:
+                self.logger.exception(
+                    f"Error adding user {data.user.name} (ID: f{data.user.id} with nation f{nation.nation_name} to database"
+                )
+                return f"There was a problem adding your nation to the database: {e}"
+            return f"You were successfully verified as {nation.nation_name}"
         else:
-            return False
+            return "Your nation could not be verified."
 
 
 @dataclass
 class VerificationAttempt:
     cog: Verification
+    user: discord.User | discord.Member
     nation_name: str = ""
     checksum: str = ""
     token: str = secrets.token_urlsafe()
@@ -61,27 +70,6 @@ async def setup(bot: NSAmbassador):
 
 
 ### UI ELEMENTS ###
-
-
-class GetNationModal(discord.ui.Modal, title="Your Nation"):
-    def __init__(self, data: VerificationAttempt):
-        super().__init__()
-        self.data = data
-        self.nation = discord.ui.Label(
-            text="Nation Name",
-            description='Your nation\'s name on NationStates ("Name" field in Settings).',
-            component=discord.ui.TextInput(placeholder="Enter Nation Name"),
-        )
-
-        self.add_item(self.nation)
-
-    async def on_submit(self, interaction: discord.Interaction):
-        assert isinstance(self.nation.component, discord.ui.TextInput)
-        self.data.nation_name = self.nation.component.value
-        await interaction.response.send_message(
-            view=VericodeLinkView(self.data),
-            ephemeral=True,
-        )
 
 
 class VericodeLinkView(discord.ui.LayoutView):
@@ -101,7 +89,7 @@ class VericodeLinkView(discord.ui.LayoutView):
                 url=f"https://www.nationstates.net/page=verify_login?token={self.data.token}",
             )
         )
-        self.action_row.add_item(VerifyButton(modal=GetVericodeModal(self.data)))
+        self.action_row.add_item(VerifyButton(modal=VerificationModal(self.data)))
 
         self.add_item(text)
         self.add_item(self.action_row)
@@ -120,26 +108,37 @@ class VerifyButton(discord.ui.Button):
         self.view.stop()
 
 
-class GetVericodeModal(discord.ui.Modal, title="Finish Verifying"):
+class VerificationModal(discord.ui.Modal, title="Verify Your Nation"):
     def __init__(self, data: VerificationAttempt):
         super().__init__()
         self.data = data
+
+        self.nation = discord.ui.Label(
+            text="Nation Name",
+            description='Your nation\'s name on NationStates ("Name" field in Settings).',
+            component=discord.ui.TextInput(placeholder="Enter Nation Name"),
+        )
         self.vericode = discord.ui.Label(
             text="Verification Code",
             description="Your Verification Code from NationStates",
             component=discord.ui.TextInput(placeholder="Enter Verification Code"),
         )
 
+        self.add_item(self.nation)
         self.add_item(self.vericode)
 
     async def on_submit(self, interaction: discord.Interaction):
+        assert isinstance(self.nation.component, discord.ui.TextInput)
         assert isinstance(self.vericode.component, discord.ui.TextInput)
+        self.data.nation_name = self.nation.component.value
+        self.data.checksum = self.vericode.component.value
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        
         success = await self.data.cog._verify(self.data)
         if success:
-            await interaction.response.send_message(
-                "Verification succeeded", ephemeral=True
-            )
+            await interaction.followup.send("Verification succeeded", ephemeral=True)
         else:
-            await interaction.response.send_message(
-                "Verification failed", ephemeral=True
-            )
+            await interaction.followup.send("Verification failed", ephemeral=True)
+
+    async def on_error(self, interaction: discord.Interaction, error: Exception):
+        await interaction.followup.send(f"Error verifying: {error}", ephemeral=True)
